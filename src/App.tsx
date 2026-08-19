@@ -10,6 +10,7 @@ import { TrainingView } from './ui/views/TrainingView.tsx';
 import { HealthView } from './ui/views/HealthView.tsx';
 import { CalendarView } from './ui/views/CalendarView.tsx';
 import { ExplorerView } from './ui/views/ExplorerView.tsx';
+import { AssistantView } from './ui/views/AssistantView.tsx';
 import { ActivityDetail } from './ui/views/ActivityDetail.tsx';
 import { Alert, Badge } from './ui/components/primitives.tsx';
 import {
@@ -19,6 +20,7 @@ import {
   IconHealth,
   IconCalendar,
   IconExplorer,
+  IconChat,
   IconSun,
   IconMoon,
   IconMonitor,
@@ -28,7 +30,7 @@ import {
 import { formatDate } from './core/units.ts';
 import type { Activity, Dataset } from './core/types.ts';
 
-type ViewId = 'overview' | 'activities' | 'training' | 'health' | 'calendar' | 'explorer';
+type ViewId = 'overview' | 'activities' | 'training' | 'health' | 'calendar' | 'explorer' | 'assistant';
 
 const VIEWS: { id: ViewId; label: string; subtitle: string; icon: typeof IconOverview }[] = [
   { id: 'overview', label: 'Overview', subtitle: 'Everything at a glance', icon: IconOverview },
@@ -37,6 +39,7 @@ const VIEWS: { id: ViewId; label: string; subtitle: string; icon: typeof IconOve
   { id: 'health', label: 'Health', subtitle: 'Sleep, heart, stress and body metrics', icon: IconHealth },
   { id: 'calendar', label: 'Calendar', subtitle: 'Training and recovery, day by day', icon: IconCalendar },
   { id: 'explorer', label: 'Data explorer', subtitle: 'Exactly what was found in your export', icon: IconExplorer },
+  { id: 'assistant', label: 'Ask AI', subtitle: 'Ask a local Ollama model about your data', icon: IconChat },
 ];
 
 export default function App() {
@@ -148,6 +151,7 @@ function Shell({
       health: dataset.daily.length,
       calendar: undefined,
       explorer: dataset.report.files.length,
+      assistant: undefined,
     }),
     [dataset, overview],
   );
@@ -280,6 +284,7 @@ function Shell({
           {view === 'health' && <HealthView />}
           {view === 'calendar' && <CalendarView onOpenActivity={setOpenActivity} />}
           {view === 'explorer' && <ExplorerView />}
+          {view === 'assistant' && <AssistantView />}
         </main>
       </div>
 

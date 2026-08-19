@@ -144,6 +144,18 @@ export const IconTrash = (p: IconProps) => (
   </Icon>
 );
 
+export const IconChat = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v10a1.5 1.5 0 0 1-1.5 1.5H9l-4.5 4v-4H5.5A1.5 1.5 0 0 1 4 15.5Z" />
+  </Icon>
+);
+
+export const IconSend = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 12 20 4l-6 16-3-7-7-1Z" />
+  </Icon>
+);
+
 export const IconTrophy = (p: IconProps) => (
   <Icon {...p}>
     <path d="M7 4h10v5a5 5 0 0 1-10 0Z" />
