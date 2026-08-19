@@ -176,8 +176,8 @@ export function buildActivitiesCsv(rows: CsvActivityRow[]): string {
         '17',
         fmtClock(row.timeSeconds * 0.98),
         fmtClock(row.timeSeconds),
-        '12',
-        '84',
+        row.ascentM === undefined ? '--' : '12',
+        row.ascentM === undefined ? '--' : '84',
       ]
         .map((v) => quote(String(v)))
         .join(','),
