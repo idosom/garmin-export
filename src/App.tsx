@@ -181,8 +181,7 @@ function Shell({
             </svg>
           </span>
           <span className="brand-text">
-            <span className="brand-name">Trailhead</span>
-            <span className="brand-sub">Garmin export analytics</span>
+            <span className="brand-name">Garmin Dashboard</span>
           </span>
         </div>
 

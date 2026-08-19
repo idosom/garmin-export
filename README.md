@@ -1,4 +1,4 @@
-# Trailhead — Garmin export analytics
+# Garmin Dashboard
 
 Turns a Garmin Connect data export into a personal analytics dashboard:
 activities, routes, training load, sleep, stress, HRV, Body Battery, weight —

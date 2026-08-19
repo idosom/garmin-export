@@ -63,7 +63,7 @@ if [ "$needs_build" = "1" ]; then
 fi
 
 URL="http://localhost:${PORT}"
-say "Starting Trailhead on ${URL}"
+say "Starting Garmin Dashboard on ${URL}"
 if [ ${#HOST_FLAG[@]} -gt 0 ]; then
   echo "Other devices on your network can use the Network address printed below."
 fi

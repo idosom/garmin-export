@@ -58,7 +58,7 @@ if defined NEEDSBUILD (
 )
 
 echo.
-echo Starting Trailhead on http://localhost:%PORT%
+echo Starting Garmin Dashboard on http://localhost:%PORT%
 if defined HOSTFLAG echo Other devices on your network can use the second address printed below.
 echo Leave this window open while you use the app. Press Ctrl-C to stop.
 echo.
