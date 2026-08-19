@@ -173,49 +173,66 @@ function Shell({
         if (files.length) onFiles(files);
       }}
     >
-      <nav className="sidebar" aria-label="Sections">
+      <header className="floating-nav">
         <div className="brand">
           <span className="brand-mark">
             <svg width="17" height="17" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path d="M6 21l5-7 4 4 4-8 7 11" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
-          <span className="brand-text">
-            <span className="brand-name">Garmin Dashboard</span>
-          </span>
+          <span className="brand-name">Garmin Dashboard</span>
         </div>
 
-        {VIEWS.map((item) => {
-          const Icon = item.icon;
-          const count = counts[item.id];
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className="nav-item"
-              aria-current={view === item.id ? 'page' : undefined}
-              onClick={() => setView(item.id)}
-            >
-              <Icon size={16} />
-              {item.label}
-              {count !== undefined && count > 0 && <span className="count">{count.toLocaleString()}</span>}
+        <nav className="nav-links" aria-label="Sections">
+          {VIEWS.map((item) => {
+            const Icon = item.icon;
+            const count = counts[item.id];
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className="nav-item"
+                aria-current={view === item.id ? 'page' : undefined}
+                onClick={() => setView(item.id)}
+              >
+                <Icon size={16} />
+                <span className="nav-label">{item.label}</span>
+                {count !== undefined && count > 0 && <span className="count">{count.toLocaleString()}</span>}
+              </button>
+            );
+          })}
+        </nav>
+
+        <span className="nav-divider" />
+
+        <div className="nav-actions">
+          <div className="segmented" role="group" aria-label="Theme">
+            <button type="button" aria-pressed={settings.theme === 'light'} onClick={() => settings.set('theme', 'light')} title="Light">
+              <IconSun size={14} />
             </button>
-          );
-        })}
-
-        <div className="sidebar-footer">
-          <div className="dataset-chip">
-            <strong title={dataset.label}>{dataset.label}</strong>
-            <span>
-              {overview.range ? `${formatDate(overview.range.start)} – ${formatDate(overview.range.end)}` : 'No dated records'}
-            </span>
-            <span>Imported {new Date(dataset.createdAt).toLocaleDateString()}</span>
+            <button type="button" aria-pressed={settings.theme === 'system'} onClick={() => settings.set('theme', 'system')} title="Match system">
+              <IconMonitor size={14} />
+            </button>
+            <button type="button" aria-pressed={settings.theme === 'dark'} onClick={() => settings.set('theme', 'dark')} title="Dark">
+              <IconMoon size={14} />
+            </button>
           </div>
-          <button type="button" className="btn ghost small" onClick={onClear}>
-            <IconTrash size={14} /> Clear local data
+          <button type="button" className="btn primary small" onClick={() => addInput.current?.click()}>
+            <IconUpload size={14} /> <span className="btn-label">Add files</span>
           </button>
+          <input
+            ref={addInput}
+            type="file"
+            multiple
+            hidden
+            onChange={(event) => {
+              const files = filesFromInput(event.target.files);
+              if (files.length) onFiles(files);
+              event.target.value = '';
+            }}
+          />
         </div>
-      </nav>
+      </header>
 
       <div className="main">
         <header className="topbar">
@@ -232,31 +249,17 @@ function Shell({
                 mi
               </button>
             </div>
-            <div className="segmented" role="group" aria-label="Theme">
-              <button type="button" aria-pressed={settings.theme === 'light'} onClick={() => settings.set('theme', 'light')} title="Light">
-                <IconSun size={14} />
-              </button>
-              <button type="button" aria-pressed={settings.theme === 'system'} onClick={() => settings.set('theme', 'system')} title="Match system">
-                <IconMonitor size={14} />
-              </button>
-              <button type="button" aria-pressed={settings.theme === 'dark'} onClick={() => settings.set('theme', 'dark')} title="Dark">
-                <IconMoon size={14} />
-              </button>
+            <div className="dataset-chip" title={dataset.label}>
+              <strong>{dataset.label}</strong>
+              <span>
+                {overview.range ? `${formatDate(overview.range.start)} – ${formatDate(overview.range.end)}` : 'No dated records'}
+                {' · Imported '}
+                {new Date(dataset.createdAt).toLocaleDateString()}
+              </span>
             </div>
-            <button type="button" className="btn" onClick={() => addInput.current?.click()}>
-              <IconUpload size={14} /> Add files
+            <button type="button" className="btn ghost small" onClick={onClear}>
+              <IconTrash size={14} /> Clear local data
             </button>
-            <input
-              ref={addInput}
-              type="file"
-              multiple
-              hidden
-              onChange={(event) => {
-                const files = filesFromInput(event.target.files);
-                if (files.length) onFiles(files);
-                event.target.value = '';
-              }}
-            />
           </div>
         </header>
 
