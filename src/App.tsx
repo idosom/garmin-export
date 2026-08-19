@@ -249,10 +249,12 @@ function Shell({
                 mi
               </button>
             </div>
-            <div className="dataset-chip" title={`${dataset.label} — imported ${new Date(dataset.createdAt).toLocaleDateString()}`}>
+            <div className="dataset-chip" title={dataset.label}>
               <strong>{dataset.label}</strong>
               <span>
                 {overview.range ? `${formatDate(overview.range.start)} – ${formatDate(overview.range.end)}` : 'No dated records'}
+                {' · Imported '}
+                {new Date(dataset.createdAt).toLocaleDateString()}
               </span>
             </div>
             <button type="button" className="btn ghost small" onClick={onClear}>
