@@ -1,21 +1,85 @@
 # Trailhead — Garmin export analytics
 
-A local-first web app that turns a Garmin Connect data export into a personal
-analytics dashboard. Drop in the export ZIP, an extracted folder, or a handful
-of loose files; everything is parsed **in your browser** and nothing is
-uploaded anywhere.
+Turns a Garmin Connect data export into a personal analytics dashboard:
+activities, routes, training load, sleep, stress, HRV, Body Battery, weight —
+whatever your files actually contain.
+
+**Everything happens in your browser.** Your export is never uploaded anywhere,
+and the app has no backend, no account and no database.
+
+---
+
+## Run it
+
+### Option 1 — put it on the web (best for using it on your phone)
+
+The app is just static files, so it can live on GitHub Pages and still never
+send your data anywhere: your files are read by the browser tab, not by the
+host.
+
+1. Push this repository to GitHub (it already is).
+2. In the repository, open **Settings → Pages**.
+3. Under **Build and deployment → Source**, choose **GitHub Actions**.
+
+That's it. Every push to `main` builds and publishes the app, and you get a URL
+like `https://<your-user>.github.io/garmin-export/` that works on any phone,
+tablet or computer with nothing installed. You can also trigger a deploy by
+hand from the **Actions** tab → *Deploy to GitHub Pages* → *Run workflow*.
+
+Bookmark the URL, or use your browser's "Add to Home Screen" so it opens like an
+app. Data you import stays in that browser (it is cached locally so a reload
+does not mean re-importing), and the **Clear local data** button removes it.
+
+### Option 2 — double-click to run it on your own computer
+
+| Your computer | Double-click |
+| --- | --- |
+| macOS | `start.command` |
+| Windows | `start.bat` |
+| Linux | `start.sh` |
+
+It installs what it needs the first time (about a minute), builds the app, then
+opens it in your browser. After that it starts in a couple of seconds. Leave
+the window open while you use the app; closing it, or pressing `Ctrl-C`, stops
+the server.
+
+The one thing you do need installed is [Node.js](https://nodejs.org) (take the
+LTS download). The script checks for it and tells you if it is missing.
+
+**Using it from your phone while it runs on your laptop:** start it with the
+`--lan` flag and it prints a second address (something like
+`http://192.168.1.24:4173/`) that other devices on your home network can open.
+
+```bash
+./start.sh --lan          # macOS / Linux
+start.bat --lan           # Windows
+```
+
+On macOS, the first double-click may be blocked by Gatekeeper — right-click
+`start.command` → **Open** → **Open**, once.
+
+### Option 3 — the usual commands
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # development server on http://localhost:5173
 npm test         # parser / normalization / analytics tests
 npm run build    # type-check + production build into dist/
+npm run preview  # serve the production build
 ```
 
-Open the app and either drop your export on the page or press **Load sample
-export** — that generates a synthetic Garmin export in the browser and runs it
-through the real pipeline, so you can see the whole dashboard without handing
-over personal data.
+### Once it is open
+
+Drop your Garmin export on the page — the whole ZIP, an extracted folder, or a
+handful of loose files. Or press **Load sample export** to generate a synthetic
+export in the browser and see the entire dashboard without handing over
+anything personal.
+
+To get your export from Garmin: **Garmin Connect → your profile → Account
+Settings → Export Your Data** (or <https://www.garmin.com/account/datamanagement/exportdata/>).
+Garmin emails you a download link, usually within a day.
+
+---
 
 ## What it reads
 
@@ -28,25 +92,48 @@ over personal data.
 | **ZIP / gzip** | Expanded recursively, including ZIPs inside ZIPs, in batches so a huge archive does not have to be inflated all at once. |
 | **JSON** | Best-effort support for the JSON files in "Export Your Data" (`UDSFile_*`, sleep, summarized activities). Structural rather than schema-driven, since these files are undocumented. |
 
-Anything it does not recognise is still reported — file, size, detected type
-and why it was skipped — in the Data explorer.
+Anything it does not recognise is still reported — file, size, detected type and
+why it was skipped — in the Data explorer.
+
+## The dashboard
+
+- **Overview** — date range, totals, activity mix, recent sessions, and the
+  health metrics that have enough data to show a trend.
+- **Activities** — searchable, filterable, sortable table; columns appear only
+  when some activity actually has that metric. Click any row for the detail.
+- **Activity detail** — interactive route map (pan/zoom, colour the track by any
+  channel), linked charts for every recorded stream, laps, time in heart-rate
+  zones, every summary metric the file contained, and an explicit list of the
+  ones it did not.
+- **Training** — weekly and monthly volume stacked by sport, fitness/fatigue/form
+  curves, acute:chronic ratio, best efforts and a power curve computed from the
+  real streams, personal bests, and a consistency heatmap.
+- **Health** — every longitudinal metric found, with selectable date ranges,
+  7-day averages, and a sleep-stage breakdown.
+- **Calendar** — training coloured by sport and volume, with an optional
+  wellness overlay so you can see recovery against load.
+- **Data explorer** — every file found, what it was detected as, message and
+  record counts, fields present, developer fields, unrecognised fields, and any
+  warnings or errors.
 
 ## Design principles
 
-**Never invent a metric.** If a file does not contain heart rate, the UI says
-so rather than showing a zero. Values that *are* derived (best efforts,
-training load when the device did not record one, distance reconstructed from a
-GPS track) say what they were derived from.
+**Never invent a metric.** If a file does not contain heart rate, the UI says so
+rather than showing a zero. Values that *are* derived (best efforts, training
+load when the device did not record one, distance reconstructed from a GPS
+track) say what they were derived from.
 
 **Nothing leaves the device.** Parsing happens in a Web Worker; the parsed
-dataset is cached in IndexedDB so a reload does not mean re-uploading. The only
-outbound request the app can make is OpenStreetMap basemap tiles on the
-activity map, which is off by default and opt-in per browser.
+dataset is cached in IndexedDB so a reload does not mean re-importing. The only
+outbound request the app can make is OpenStreetMap basemap tiles on the activity
+map, which is off by default and opt-in per browser.
 
 **Unknown data is kept, not dropped.** Unrecognised FIT fields become
 `field_<n>`, developer fields keep their declared name and units, and unknown
 CSV columns and XML extension elements are preserved. They show up in the
 activity detail view and in the Data explorer.
+
+---
 
 ## Architecture
 
@@ -74,10 +161,10 @@ around it:
 
 ### Extending it
 
-* **A new metric**: add a row to `WELLNESS_METRICS` (wellness) or
-  `CHANNEL_META` (per-sample). The Health view, the calendar overlay and the
-  activity charts pick it up automatically — they enumerate what exists rather
-  than hard-coding a list.
+* **A new metric**: add a row to `WELLNESS_METRICS` (wellness) or `CHANNEL_META`
+  (per-sample). The Health view, the calendar overlay and the activity charts
+  pick it up automatically — they enumerate what exists rather than hard-coding
+  a list.
 * **A new FIT message or field**: add it to `FIT_MESSAGES` in
   `parsers/fit/profile.ts`. Until you do, the value is still decoded and kept as
   `mesg_<n>` / `field_<n>`.
@@ -99,3 +186,19 @@ Sample data is columnar (`Float64Array`/`Float32Array`) rather than millions of
 objects, streams are downsampled with largest-triangle-three-buckets before
 charting, and archives are inflated in batches, so multi-year exports stay
 responsive.
+
+## Troubleshooting
+
+**"Node.js is not installed"** — install the LTS build from
+<https://nodejs.org>, then double-click the start file again.
+
+**The page opens but is blank** — you probably opened `dist/index.html`
+directly from your file manager. Browsers refuse to load the app's worker over
+`file://`; use one of the options above instead.
+
+**Port already in use** — pass a different one: `./start.sh --port=5000`.
+
+**A huge export is slow to import** — it is doing real work (a 900-activity
+export takes a few seconds; several gigabytes will take longer). The progress
+bar names the file it is on, and the import runs off the main thread so the page
+stays responsive.
